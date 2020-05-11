@@ -1,9 +1,9 @@
-##Main idea
+## Main idea
 Have a generic builder to build any kind of emulator which relies on some items with specific properties. As an output there should be a set of preferred characteristics depending on the items and formulas applied upon them.
 
 ----------
 
-###Functionalities
+### Functionalities
 - **Item** CRUD operations
     - Create an item
         - provide a type of an item
