@@ -8,7 +8,7 @@ import Item from '../../src/models/Item';
 describe('Item CRUD operations', () => {
   it('should create a new item', async () => {
     const itemsBefore = await Item.countDocuments();
-    await request(server).post(`${process.env.API_PREFIX}/items`).send({
+    await request(server).post(`/api/v1/items`).send({
       type: 'test',
     });
     const itemsAfter = await Item.countDocuments();
@@ -20,16 +20,14 @@ describe('Item CRUD operations', () => {
       const item = new Item({ type: `test-${ind}` });
       await item.save();
     });
-    const res = await request(server).get(`${process.env.API_PREFIX}/items`);
+    const res = await request(server).get(`/api/v1/items`);
     expect(res.body.data.length).to.equal(3);
   });
 
   it('should get by id', async () => {
     const item = new Item({ type: 'test' });
     await item.save();
-    const res = await request(server).get(
-      `${process.env.API_PREFIX}/items/${item._id}`,
-    );
+    const res = await request(server).get(`/api/v1/items/${item._id}`);
     expect(res.body.data._id).to.equal(item._id.toString());
   });
 
@@ -37,20 +35,16 @@ describe('Item CRUD operations', () => {
     const item = new Item({ type: 'test' });
     await item.save();
     const newType = 'test updated';
-    const res = await request(server)
-      .put(`${process.env.API_PREFIX}/items/${item._id}`)
-      .send({
-        type: newType,
-      });
+    const res = await request(server).put(`/api/v1/items/${item._id}`).send({
+      type: newType,
+    });
     expect(res.body.data.type).to.equal(newType);
   });
 
   it('should delete an item', async () => {
     const item = new Item({ type: 'test' });
     await item.save();
-    const res = await request(server).delete(
-      `${process.env.API_PREFIX}/items/${item._id}`,
-    );
+    const res = await request(server).delete(`/api/v1/items/${item._id}`);
     expect(res.body.data).to.equal(null);
   });
 });

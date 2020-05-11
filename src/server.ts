@@ -1,33 +1,9 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import morgan from 'morgan';
 import 'colors';
 
-import connectDB from '../config/db';
-import itemsRouter from './routers/items';
+import App from './App';
 
-dotenv.config({ path: './config/config.env' });
-
-connectDB();
-
-const app = express();
-
-// enable logging only in dev mode
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
-
-// Body parser
-app.use(express.json());
-
-app.use('/api/v1', itemsRouter);
-
-const server = app.listen(process.env.PORT, () =>
-  console.log(
-    `Server started in ${process.env.NODE_ENV} mode on port ${process.env.PORT}`
-      .yellow.bold,
-  ),
-);
+const app = new App();
+const server = app.listen();
 
 // Handle unhandled promise rejections
 (process as NodeJS.EventEmitter).on('unhandledRejection', (err: Error) => {
