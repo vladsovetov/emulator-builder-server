@@ -3,7 +3,7 @@ import { Server } from 'http';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
 
-import connectDB from '../config/db';
+import connectDB from './utils/db';
 
 import itemsRouter from './routers/items';
 

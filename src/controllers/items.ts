@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 
-import Item from '../models/Item';
+import { Item, ItemModel } from '../models/Item';
 
 // @desc    Create item
 // @route   POST /api/v1/items
@@ -8,9 +8,9 @@ import Item from '../models/Item';
 export const createItem: RequestHandler = async (req, res, next) => {
   const { type } = req.body;
 
-  const item = await Item.create({
+  const item = await ItemModel.create({
     type: type,
-  });
+  } as Item);
 
   res.status(201).json({
     success: true,
@@ -22,7 +22,7 @@ export const createItem: RequestHandler = async (req, res, next) => {
 // @route   GET /api/v1/items
 // @access  Public
 export const getItems: RequestHandler = async (req, res, next) => {
-  const items = await Item.find({});
+  const items = await ItemModel.find({});
   res.status(200).json({
     success: true,
     data: items,
@@ -35,7 +35,7 @@ export const getItems: RequestHandler = async (req, res, next) => {
 export const getItem: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
 
-  const item = await Item.findById(id);
+  const item = await ItemModel.findById(id);
 
   if (!item) {
     throw new Error(`Can not find resource with id: ${id}`);
@@ -54,7 +54,7 @@ export const updateItem: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
   const { type } = req.body;
 
-  const item = await Item.findById(id);
+  const item = await ItemModel.findById(id);
 
   if (!item) {
     throw new Error(`Can not find resource with id: ${id}`);
@@ -75,7 +75,7 @@ export const updateItem: RequestHandler = async (req, res, next) => {
 export const deleteItem: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
 
-  const item = await Item.findById(id);
+  const item = await ItemModel.findById(id);
 
   if (!item) {
     throw new Error(`Can not find resource with id: ${id}`);

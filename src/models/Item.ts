@@ -1,17 +1,15 @@
-import mongoose, { Schema } from 'mongoose';
+import { prop, getModelForClass } from '@typegoose/typegoose';
+import { ItemProp } from '../types';
 
-export interface ItemInterface extends mongoose.Document {
-  type: string;
-  props: {}[];
-  requiredProps: {}[];
+export class Item {
+  @prop()
+  public type: string = '';
+
+  @prop()
+  public props: ItemProp[] = [];
+
+  @prop()
+  public requiredProps: ItemProp[] = [];
 }
 
-const ItemSchema = new Schema({
-  type: String,
-  props: [Object],
-  requiredProps: [Object],
-});
-
-const Item = mongoose.model<ItemInterface>('Item', ItemSchema);
-
-export default Item;
+export const ItemModel = getModelForClass(Item);
