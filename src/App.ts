@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import connectDB from './utils/db';
 
 import itemsRouter from './routers/items';
+import propsRouter from './routers/props';
 
 export default class App {
   private app: express.Express;
@@ -47,5 +48,6 @@ export default class App {
 
   private initRouters() {
     this.app.use('/api/v1', itemsRouter);
+    this.app.use('/api/v1', propsRouter);
   }
 }
