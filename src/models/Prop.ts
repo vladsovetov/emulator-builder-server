@@ -5,7 +5,7 @@ export class Prop {
   public name: string = '';
 
   @prop()
-  public value: string | number = '';
+  public value: string = '';
 }
 
 export const PropModel = getModelForClass(Prop);

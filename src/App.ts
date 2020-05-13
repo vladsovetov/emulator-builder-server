@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 
 import connectDB from './utils/db';
+import errorHandler from './middleware/errorHandler';
 
 import itemsRouter from './routers/items';
 import propsRouter from './routers/props';
@@ -22,6 +23,7 @@ export default class App {
     this.configure();
     this.initMiddleware();
     this.initRouters();
+    this.initPostMiddleware();
   }
 
   public listen(): Server {
@@ -71,5 +73,10 @@ export default class App {
   private initRouters() {
     this.app.use('/api/v1', itemsRouter);
     this.app.use('/api/v1', propsRouter);
+  }
+
+  private initPostMiddleware() {
+    // error handler to return json format error to client
+    this.app.use(errorHandler);
   }
 }

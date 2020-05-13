@@ -35,7 +35,7 @@ describe('Props CRUD operations', () => {
   it('should update a prop', async () => {
     const prop = new PropModel({ name: 'test', value: 0 });
     await prop.save();
-    const newValue = 1;
+    const newValue = '1';
     const res = await request(server).put(`/api/v1/props/${prop._id}`).send({
       value: newValue,
     });

@@ -1,98 +1,108 @@
 import { RequestHandler } from 'express';
+import createError from 'http-errors';
 
 import { Prop, PropModel } from '../models/Prop';
+import asyncHandler from '../middleware/asyncHandler';
 
 // @desc    Create prop
 // @route   POST /api/v1/props
 // @access  Private, Creator
-export const createOne: RequestHandler = async (req, res, next) => {
-  const { name, value } = req.body;
+export const createOne: RequestHandler = asyncHandler(
+  async (req, res, next) => {
+    const { name, value } = req.body;
 
-  const prop = await PropModel.create({
-    name: name,
-    value: value,
-  } as Prop);
+    const prop = await PropModel.create({
+      name: name,
+      value: value,
+    } as Prop);
 
-  res.status(201).json({
-    success: true,
-    data: prop,
-  });
-};
+    res.status(201).json({
+      success: true,
+      data: prop,
+    });
+  },
+);
 
 // @desc    Get props
 // @route   GET /api/v1/props
 // @access  Public
-export const getMany: RequestHandler = async (req, res, next) => {
+export const getMany: RequestHandler = asyncHandler(async (req, res, next) => {
   const props = await PropModel.find({});
   res.status(200).json({
     success: true,
     data: props,
   });
-};
+});
 
 // @desc    Get prop
 // @route   GET /api/v1/props/:id
 // @access  Public
-export const getOne: RequestHandler = async (req, res, next) => {
+export const getOne: RequestHandler = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
   const prop = await PropModel.findById(id);
 
   if (!prop) {
-    throw new Error(`Can not find resource with id: ${id}`);
+    const err = createError(404, `Can not find resource`);
+    console.log(err.statusCode);
+    return next(err);
   }
 
   res.status(200).json({
     success: true,
     data: prop,
   });
-};
+});
 
 // @desc    Update prop
 // @route   GET /api/v1/props/:id
 // @access  Private, Creator
-export const updateOne: RequestHandler = async (req, res, next) => {
-  const { id } = req.params;
-  const { name, value } = req.body;
+export const updateOne: RequestHandler = asyncHandler(
+  async (req, res, next) => {
+    const { id } = req.params;
+    const { name, value } = req.body;
 
-  const prop = await PropModel.findById(id);
+    const prop = await PropModel.findById(id);
 
-  if (!prop) {
-    throw new Error(`Can not find resource with id: ${id}`);
-  }
-  if (!name && typeof value === 'undefined') {
-    throw new Error(`Provided bad fields for the resource`);
-  }
-  if (name) {
-    prop.name = name;
-  }
-  if (typeof value !== 'undefined') {
-    prop.value = value;
-  }
-  await prop.save();
+    if (!prop) {
+      return next(createError(404, `Can not find resource`));
+    }
+    if (!name && typeof value === 'undefined') {
+      return next(createError(400, `Provided bad fields for the resource`));
+    }
+    if (name) {
+      prop.name = name;
+    }
+    if (typeof value !== 'undefined') {
+      prop.value = value;
+    }
+    await prop.save();
 
-  res.status(200).json({
-    success: true,
-    data: prop,
-  });
-};
+    res.status(200).json({
+      success: true,
+      data: prop,
+    });
+  },
+);
 
 // @desc    Delete prop
 // @route   DELETE /api/v1/props/:id
 // @access  Private, Creator
-export const deleteOne: RequestHandler = async (req, res, next) => {
-  const { id } = req.params;
+export const deleteOne: RequestHandler = asyncHandler(
+  async (req, res, next) => {
+    const { id } = req.params;
 
-  const prop = await PropModel.findById(id);
+    const prop = await PropModel.findById(id);
 
-  if (!prop) {
-    throw new Error(`Can not find resource with id: ${id}`);
-  }
+    if (!prop) {
+      return next(createError(404, `Can not find resource`));
+    }
 
-  await prop.remove();
+    await prop.remove();
 
-  res.status(200).json({
-    success: true,
-    data: null,
-  });
-};
+    res.status(200).json({
+      success: true,
+      data: null,
+    });
+  },
+);
