@@ -12,6 +12,11 @@ Have a generic builder to build any kind of emulator which relies on some items 
     - Read item(s)
     - Update an item
     - Delete an item
+- **Prop** CRUD operations
+    - Create an item prop
+    - Read prop(s)
+    - Update a prop
+    - Delete a prop
 - **Collection** CRUD operations
     - Create a collection
         - provide IDs of items which are part of a collection

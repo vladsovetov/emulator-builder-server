@@ -1,19 +1,19 @@
 import { Router } from 'express';
 
 import {
-  createItem,
-  getItems,
-  getItem,
-  updateItem,
-  deleteItem,
+  createOne,
+  getMany,
+  getOne,
+  updateOne,
+  deleteOne,
 } from '../controllers/items';
 
 const router = Router();
 
-router.post('/items', createItem);
-router.get('/items', getItems);
-router.get('/items/:id', getItem);
-router.put('/items/:id', updateItem);
-router.delete('/items/:id', deleteItem);
+router.post('/items', createOne);
+router.get('/items', getMany);
+router.get('/items/:id', getOne);
+router.put('/items/:id', updateOne);
+router.delete('/items/:id', deleteOne);
 
 export default router;

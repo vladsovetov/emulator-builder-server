@@ -1,87 +1,95 @@
 import { RequestHandler } from 'express';
 
-import { Item, ItemModel } from '../models/Item';
+import { Prop, PropModel } from '../models/Prop';
 
-// @desc    Create item
-// @route   POST /api/v1/items
+// @desc    Create prop
+// @route   POST /api/v1/props
 // @access  Private, Creator
 export const createOne: RequestHandler = async (req, res, next) => {
-  const { type } = req.body;
+  const { name, value } = req.body;
 
-  const item = await ItemModel.create({
-    type: type,
-  } as Item);
+  const prop = await PropModel.create({
+    name: name,
+    value: value,
+  } as Prop);
 
   res.status(201).json({
     success: true,
-    data: item,
+    data: prop,
   });
 };
 
-// @desc    Get items
-// @route   GET /api/v1/items
+// @desc    Get props
+// @route   GET /api/v1/props
 // @access  Public
 export const getMany: RequestHandler = async (req, res, next) => {
-  const items = await ItemModel.find({});
+  const props = await PropModel.find({});
   res.status(200).json({
     success: true,
-    data: items,
+    data: props,
   });
 };
 
-// @desc    Get item
-// @route   GET /api/v1/items/:id
+// @desc    Get prop
+// @route   GET /api/v1/props/:id
 // @access  Public
 export const getOne: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
 
-  const item = await ItemModel.findById(id);
+  const prop = await PropModel.findById(id);
 
-  if (!item) {
+  if (!prop) {
     throw new Error(`Can not find resource with id: ${id}`);
   }
 
   res.status(200).json({
     success: true,
-    data: item,
+    data: prop,
   });
 };
 
-// @desc    Update item
-// @route   GET /api/v1/items/:id
+// @desc    Update prop
+// @route   GET /api/v1/props/:id
 // @access  Private, Creator
 export const updateOne: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
-  const { type } = req.body;
+  const { name, value } = req.body;
 
-  const item = await ItemModel.findById(id);
+  const prop = await PropModel.findById(id);
 
-  if (!item) {
+  if (!prop) {
     throw new Error(`Can not find resource with id: ${id}`);
   }
-
-  item.type = type;
-  await item.save();
+  if (!name && typeof value === 'undefined') {
+    throw new Error(`Provided bad fields for the resource`);
+  }
+  if (name) {
+    prop.name = name;
+  }
+  if (typeof value !== 'undefined') {
+    prop.value = value;
+  }
+  await prop.save();
 
   res.status(200).json({
     success: true,
-    data: item,
+    data: prop,
   });
 };
 
-// @desc    Delete item
-// @route   DELETE /api/v1/items/:id
+// @desc    Delete prop
+// @route   DELETE /api/v1/props/:id
 // @access  Private, Creator
 export const deleteOne: RequestHandler = async (req, res, next) => {
   const { id } = req.params;
 
-  const item = await ItemModel.findById(id);
+  const prop = await PropModel.findById(id);
 
-  if (!item) {
+  if (!prop) {
     throw new Error(`Can not find resource with id: ${id}`);
   }
 
-  await item.remove();
+  await prop.remove();
 
   res.status(200).json({
     success: true,
