@@ -2,6 +2,11 @@ import express from 'express';
 import { Server } from 'http';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
+import mongoSanitize from 'express-mongo-sanitize';
+import rateLimit from 'express-rate-limit';
+import xss from 'xss-clean';
+import helmet from 'helmet';
+import hpp from 'hpp';
 
 import connectDB from './utils/db';
 
@@ -44,6 +49,23 @@ export default class App {
 
     // Body parser
     this.app.use(express.json());
+
+    // SECURITY
+    // setting various HTTP headers to secure Express app
+    this.app.use(helmet());
+    // sanitizes user-supplied data to prevent MongoDB Operator Injection
+    this.app.use(mongoSanitize());
+    // sanitize user input coming from POST body, GET queries, and url params
+    this.app.use(xss());
+    // basic rate-limiting middleware
+    const limiter = rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // limit each IP to 100 requests per windowMs
+    });
+    //  apply to all requests
+    this.app.use(limiter);
+    // protect against HTTP Parameter Pollution attacks
+    this.app.use(hpp());
   }
 
   private initRouters() {
