@@ -15,11 +15,9 @@ before(async () => {
 
 // Cleanup mongoose DB before each test execution
 beforeEach(async () => {
-  for (let collectionName in mongoose.connection.collections) {
-    try {
-      await mongoose.connection.collections[collectionName].drop();
-    } catch (error) {
-      console.warn('Warning', error);
-    }
+  const collections = await mongoose.connection.db.collections();
+
+  for (let collection of collections) {
+    await collection.deleteMany({});
   }
 });
