@@ -2,6 +2,7 @@ import { RequestHandler } from 'express';
 import createError from 'http-errors';
 
 import { Item, ItemModel } from '../models/Item';
+import { PropModel } from '../models/Prop';
 import asyncHandler from '../middleware/asyncHandler';
 
 // @desc    Create item
@@ -9,10 +10,35 @@ import asyncHandler from '../middleware/asyncHandler';
 // @access  Private, Creator
 export const createOne: RequestHandler = asyncHandler(
   async (req, res, next) => {
-    const { type } = req.body;
+    const { name, type } = req.body;
+    let { props } = req.body;
+
+    if (props) {
+      // check if each prop exists in DB, otherwise throw an error
+      const notValidIds = [];
+      for (const id of props) {
+        try {
+          const prop = await PropModel.findById(id);
+          if (!prop) {
+            throw new Error();
+          }
+        } catch (err) {
+          notValidIds.push(id);
+        }
+      }
+      if (notValidIds.length > 0) {
+        return next(
+          createError(
+            `Can not find resource with ids: ${notValidIds.join(',')}`,
+          ),
+        );
+      }
+    }
 
     const item = await ItemModel.create({
+      name: name,
       type: type,
+      props: props,
     } as Item);
 
     res.status(201).json({
@@ -26,7 +52,7 @@ export const createOne: RequestHandler = asyncHandler(
 // @route   GET /api/v1/items
 // @access  Public
 export const getMany: RequestHandler = asyncHandler(async (req, res, next) => {
-  const items = await ItemModel.find({});
+  const items = await ItemModel.find({}).populate('props');
   res.status(200).json({
     success: true,
     data: items,
