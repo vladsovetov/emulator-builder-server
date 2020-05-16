@@ -2,7 +2,8 @@ import { RequestHandler } from 'express';
 import createError from 'http-errors';
 
 import { Item, ItemModel } from '../models/Item';
-import { PropModel } from '../models/Prop';
+import { Prop } from '../models/Prop';
+import { validatePropsRefs } from '../utils/propsValidator';
 import asyncHandler from '../middleware/asyncHandler';
 
 // @desc    Create item
@@ -11,27 +12,12 @@ import asyncHandler from '../middleware/asyncHandler';
 export const createOne: RequestHandler = asyncHandler(
   async (req, res, next) => {
     const { name, type } = req.body;
-    let { props } = req.body;
+    let { props }: { props: Prop[] } = req.body;
 
     if (props) {
-      // check if each prop exists in DB, otherwise throw an error
-      const notValidIds = [];
-      for (const id of props) {
-        try {
-          const prop = await PropModel.findById(id);
-          if (!prop) {
-            throw new Error();
-          }
-        } catch (err) {
-          notValidIds.push(id);
-        }
-      }
-      if (notValidIds.length > 0) {
-        return next(
-          createError(
-            `Can not find resource with ids: ${notValidIds.join(',')}`,
-          ),
-        );
+      const validationResult = validatePropsRefs(props);
+      if (!validationResult.isValid) {
+        return next(createError(400, validationResult.errorMsg!));
       }
     }
 

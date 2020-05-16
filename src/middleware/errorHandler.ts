@@ -14,6 +14,14 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     error = createError(404, `Can not find resource`);
   }
 
+  // Reduce message for validation error
+  if (err.name === 'ValidationError') {
+    const messages = Object.values(err.errors as Error[]).map(
+      (val) => val.message,
+    );
+    error = createError(400, `Provided wrong data: ${messages.join(', ')}`);
+  }
+
   res.status(error.statusCode || 500).json({
     success: false,
     error: error.message || 'Server Error',
