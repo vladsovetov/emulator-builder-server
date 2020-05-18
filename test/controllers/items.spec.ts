@@ -2,7 +2,7 @@ import request from 'supertest';
 import { expect } from 'chai';
 import 'mocha';
 
-import server from '../../src/server';
+import { server } from '../../src/server';
 import { ItemModel } from '../../src/models/Item';
 import { PropModel } from '../../src/models/Prop';
 
@@ -43,7 +43,7 @@ describe('Item CRUD operations', () => {
     expect(res.body.data.length).to.equal(3);
   });
 
-  it('should get by id', async () => {
+  it('should get item by id', async () => {
     const item = new ItemModel({ name: 'test', type: 'test' });
     await item.save();
     const res = await request(server).get(`/api/v1/items/${item._id}`);

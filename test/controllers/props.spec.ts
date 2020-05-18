@@ -2,7 +2,7 @@ import request from 'supertest';
 import { expect } from 'chai';
 import 'mocha';
 
-import server from '../../src/server';
+import { server } from '../../src/server';
 import { PropModel } from '../../src/models/Prop';
 
 describe('Props CRUD operations', () => {

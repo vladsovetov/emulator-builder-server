@@ -2,10 +2,14 @@ import { prop, arrayProp, getModelForClass, Ref } from '@typegoose/typegoose';
 import { Prop } from './Prop';
 
 export class Item {
-  @prop()
+  @prop({
+    required: true,
+  })
   public name: string = '';
 
-  @prop()
+  @prop({
+    required: true,
+  })
   public type: string = '';
 
   @arrayProp({
@@ -13,7 +17,9 @@ export class Item {
   })
   public props?: Ref<Prop>[] = [];
 
-  @prop()
+  @arrayProp({
+    ref: Prop,
+  })
   public requiredProps?: Ref<Prop>[] = [];
 }
 

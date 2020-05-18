@@ -4,7 +4,8 @@
   "description": "",
   "scripts": {
     "test": "mocha -r ts-node/register test/**/** --file ./test/setup.ts",
-    "start": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/server.ts"
+    "test:watch": "nodemon --exec 'npm run test -- --watch --watch-files src, test/**/*.ts'",
+    "start": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/index.ts"
   },
   "repository": {
     "type": "git",

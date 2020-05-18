@@ -7,18 +7,20 @@ import rateLimit from 'express-rate-limit';
 import xss from 'xss-clean';
 import helmet from 'helmet';
 import hpp from 'hpp';
+import 'colors';
 
 import connectDB from './utils/db';
 import errorHandler from './middleware/errorHandler';
 
 import itemsRouter from './routers/items';
 import propsRouter from './routers/props';
+import collectionsRouter from './routers/collections';
 
 export default class App {
-  private app: express.Express;
+  private server: express.Express;
 
   constructor() {
-    this.app = express();
+    this.server = express();
 
     this.configure();
     this.initMiddleware();
@@ -27,12 +29,16 @@ export default class App {
   }
 
   public listen(): Server {
-    return this.app.listen(process.env.PORT, () =>
+    return this.server.listen(process.env.PORT, () =>
       console.log(
         `Server started in ${process.env.NODE_ENV} mode on port ${process.env.PORT}`
           .yellow.bold,
       ),
     );
+  }
+
+  public getServer(): express.Express {
+    return this.server;
   }
 
   private configure() {
@@ -46,37 +52,38 @@ export default class App {
   private initMiddleware() {
     // enable logging only in dev mode
     if (process.env.NODE_ENV === 'development') {
-      this.app.use(morgan('dev'));
+      this.server.use(morgan('dev'));
     }
 
     // Body parser
-    this.app.use(express.json());
+    this.server.use(express.json());
 
     // SECURITY
     // setting various HTTP headers to secure Express app
-    this.app.use(helmet());
+    this.server.use(helmet());
     // sanitizes user-supplied data to prevent MongoDB Operator Injection
-    this.app.use(mongoSanitize());
+    this.server.use(mongoSanitize());
     // sanitize user input coming from POST body, GET queries, and url params
-    this.app.use(xss());
+    this.server.use(xss());
     // basic rate-limiting middleware
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 100, // limit each IP to 100 requests per windowMs
     });
     //  apply to all requests
-    this.app.use(limiter);
+    this.server.use(limiter);
     // protect against HTTP Parameter Pollution attacks
-    this.app.use(hpp());
+    this.server.use(hpp());
   }
 
   private initRouters() {
-    this.app.use('/api/v1', itemsRouter);
-    this.app.use('/api/v1', propsRouter);
+    this.server.use('/api/v1', itemsRouter);
+    this.server.use('/api/v1', propsRouter);
+    this.server.use('/api/v1', collectionsRouter);
   }
 
   private initPostMiddleware() {
     // error handler to return json format error to client
-    this.app.use(errorHandler);
+    this.server.use(errorHandler);
   }
 }
