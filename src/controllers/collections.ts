@@ -3,7 +3,6 @@ import createError from 'http-errors';
 
 import { Collection, CollectionModel } from '../models/Collection';
 import { Item } from '../models/Item';
-import { validatePropsRefs } from '../utils/propsValidator';
 import asyncHandler from '../middleware/asyncHandler';
 
 // @desc    Create collection

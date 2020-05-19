@@ -1,7 +1,9 @@
-import { prop, arrayProp, getModelForClass, Ref } from '@typegoose/typegoose';
+import { prop, getModelForClass, Ref, plugin } from '@typegoose/typegoose';
+import idValidator from 'mongoose-id-validator';
 import { Item } from './Item';
 import { Prop } from './Prop';
 
+@plugin(idValidator)
 export class Collection {
   @prop({
     required: true,

@@ -1,6 +1,8 @@
-import { prop, arrayProp, getModelForClass, Ref } from '@typegoose/typegoose';
+import { prop, getModelForClass, Ref, plugin } from '@typegoose/typegoose';
+import idValidator from 'mongoose-id-validator';
 import { Prop } from './Prop';
 
+@plugin(idValidator)
 export class Item {
   @prop({
     required: true,
@@ -12,12 +14,12 @@ export class Item {
   })
   public type: string = '';
 
-  @arrayProp({
+  @prop({
     ref: Prop,
   })
   public props?: Ref<Prop>[] = [];
 
-  @arrayProp({
+  @prop({
     ref: Prop,
   })
   public requiredProps?: Ref<Prop>[] = [];

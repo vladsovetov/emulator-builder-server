@@ -1,8 +1,8 @@
 import 'colors';
 
-import { server } from './server';
+import { app } from './server';
 
-server.listen();
+const server = app.listen();
 
 // Handle unhandled promise rejections
 (process as NodeJS.EventEmitter).on('unhandledRejection', (err: Error) => {

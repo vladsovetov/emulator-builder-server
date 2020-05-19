@@ -51,7 +51,7 @@ export const getMany: RequestHandler = asyncHandler(async (req, res, next) => {
 export const getOne: RequestHandler = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
 
-  const item = await ItemModel.findById(id);
+  const item = await ItemModel.findById(id).populate('props');
 
   if (!item) {
     return next(createError(404, `Can not find resource`));
