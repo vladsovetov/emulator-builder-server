@@ -6,7 +6,7 @@ import { server } from '../../src/server';
 import { CollectionModel } from '../../src/models/Collection';
 import { ItemModel } from '../../src/models/Item';
 
-describe('Collection CRUD operations 34', () => {
+describe('Collection CRUD operations', () => {
   it('should create a new collection  ', async () => {
     const itemsBefore = await CollectionModel.countDocuments();
     await request(server).post(`/api/v1/collections`).send({
@@ -19,7 +19,7 @@ describe('Collection CRUD operations 34', () => {
 
   it('should create a collection with existent items', async () => {
     // create firstly a item before creating the collection with relation to it
-    const item = new ItemModel({ name: 'item1' });
+    const item = new ItemModel({ name: 'item1', type: 'type1' });
     await item.save();
     const requestData = {
       name: 'collection1',

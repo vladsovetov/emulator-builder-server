@@ -15,6 +15,7 @@ import errorHandler from './middleware/errorHandler';
 import itemsRouter from './routers/items';
 import propsRouter from './routers/props';
 import collectionsRouter from './routers/collections';
+import panelsRouter from './routers/panels';
 
 export default class App {
   private server: express.Express;
@@ -80,6 +81,7 @@ export default class App {
     this.server.use('/api/v1', itemsRouter);
     this.server.use('/api/v1', propsRouter);
     this.server.use('/api/v1', collectionsRouter);
+    this.server.use('/api/v1', panelsRouter);
   }
 
   private initPostMiddleware() {
