@@ -5,6 +5,7 @@ declare global {
       NODE_ENV: 'development' | 'production';
       PORT: string;
       PROPS_LIST_MAX_LENGTH: string;
+      SALT_ROUNDS: string;
     }
   }
 }
