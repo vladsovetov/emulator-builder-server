@@ -1,7 +1,9 @@
 import { prop, getModelForClass, pre } from '@typegoose/typegoose';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 import { USER_ROLES } from '../constants';
+import { ModelType, DocumentType } from '@typegoose/typegoose/lib/types';
 
 @pre('save', async function (next) {
   if (!this.isModified('password')) {
@@ -16,9 +18,7 @@ import { USER_ROLES } from '../constants';
   next();
 })
 export class User {
-  @prop({
-    required: true,
-  })
+  @prop()
   public name: string = '';
 
   @prop({
@@ -34,10 +34,13 @@ export class User {
 
   @prop({
     required: true,
+    select: false,
   })
   public password: string = '';
 
-  @prop()
+  @prop({
+    select: false,
+  })
   public resetPasswordToken: string = '';
 
   @prop({
@@ -50,6 +53,22 @@ export class User {
     default: Date.now,
   })
   public created: string = '';
+
+  constructor(args: any) {
+    return;
+  }
+
+  public getJWT(this: DocumentType<User>) {
+    return jwt.sign({ id: this._id }, process.env.JWT_SECRET!, {
+      expiresIn: process.env.JWT_EXPIRE,
+    });
+  }
+
+  public async matchPassword(this: DocumentType<User>, password: string) {
+    return bcrypt.compare(password, this.password);
+  }
 }
+
+export const a = new User('1');
 
 export const UserModel = getModelForClass(User);

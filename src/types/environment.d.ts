@@ -6,6 +6,9 @@ declare global {
       PORT: string;
       PROPS_LIST_MAX_LENGTH: string;
       SALT_ROUNDS: string;
+      JWT_SECRET: string;
+      JWT_EXPIRE: string;
+      JWT_COOKIE_EXPIRE: string;
     }
   }
 }

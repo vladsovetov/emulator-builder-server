@@ -1,5 +1,7 @@
 import { Router } from 'express';
 
+import { USER_ROLES } from '../constants';
+import { authorized, role } from '../middleware/auth';
 import {
   createOne,
   getMany,
@@ -10,10 +12,13 @@ import {
 
 const router = Router();
 
-router.post('/users', createOne);
-router.get('/users', getMany);
-router.get('/users/:id', getOne);
-router.put('/users/:id', updateOne);
-router.delete('/users/:id', deleteOne);
+// Private APIs
+// Admin role
+router.use(authorized, role(USER_ROLES.ADMIN));
+router.post('/', createOne);
+router.get('/', getMany);
+router.get('/:id', getOne);
+router.put('/:id', updateOne);
+router.delete('/:id', deleteOne);
 
 export default router;

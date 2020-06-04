@@ -7,6 +7,7 @@ import rateLimit from 'express-rate-limit';
 import xss from 'xss-clean';
 import helmet from 'helmet';
 import hpp from 'hpp';
+import cookieParser from 'cookie-parser';
 import 'colors';
 
 import connectDB from './utils/db';
@@ -17,6 +18,7 @@ import propsRouter from './routers/props';
 import collectionsRouter from './routers/collections';
 import panelsRouter from './routers/panels';
 import usersRouter from './routers/users';
+import authRouter from './routers/auth';
 
 export default class App {
   private server: express.Express;
@@ -59,6 +61,8 @@ export default class App {
 
     // Body parser
     this.server.use(express.json());
+    // Cookie parser
+    this.server.use(cookieParser());
 
     // SECURITY
     // setting various HTTP headers to secure Express app
@@ -79,11 +83,12 @@ export default class App {
   }
 
   private initRouters() {
-    this.server.use('/api/v1', itemsRouter);
-    this.server.use('/api/v1', propsRouter);
-    this.server.use('/api/v1', collectionsRouter);
-    this.server.use('/api/v1', panelsRouter);
-    this.server.use('/api/v1', usersRouter);
+    this.server.use('/api/v1/items', itemsRouter);
+    this.server.use('/api/v1/props', propsRouter);
+    this.server.use('/api/v1/collections', collectionsRouter);
+    this.server.use('/api/v1/panels', panelsRouter);
+    this.server.use('/api/v1/users', usersRouter);
+    this.server.use('/api/v1/auth', authRouter);
   }
 
   private initPostMiddleware() {
