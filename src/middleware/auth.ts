@@ -4,11 +4,13 @@ import createError from 'http-errors';
 
 import { USER_ROLES } from '../constants';
 import asyncHandler from './asyncHandler';
-import { UserModel } from '../models/User';
 
 export const authorized: RequestHandler = asyncHandler(
   async (req, res, next) => {
-    const token = req.cookies['token'];
+    let token = null;
+    if (req.headers.authorization) {
+      token = req.headers.authorization.split(' ')[1];
+    }
 
     if (!token) {
       return next(createError(401, `Not authorized to access`));
@@ -16,12 +18,10 @@ export const authorized: RequestHandler = asyncHandler(
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-        id: string;
+        sub: string;
+        role: string;
       };
-      const user = await UserModel.findById(decoded.id);
-      if (user) {
-        req.user = user;
-      }
+      req.user = decoded;
       next();
     } catch (e) {
       return next(createError(401, `Not authorized to access`));

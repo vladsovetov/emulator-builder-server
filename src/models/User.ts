@@ -23,6 +23,7 @@ export class User {
 
   @prop({
     required: true,
+    unique: true,
     validate: {
       validator: (value) => {
         var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -59,9 +60,13 @@ export class User {
   }
 
   public getJWT(this: DocumentType<User>) {
-    return jwt.sign({ id: this._id }, process.env.JWT_SECRET!, {
-      expiresIn: process.env.JWT_EXPIRE,
-    });
+    return jwt.sign(
+      { sub: this._id, role: this.role },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: process.env.JWT_EXPIRE,
+      },
+    );
   }
 
   public async matchPassword(this: DocumentType<User>, password: string) {

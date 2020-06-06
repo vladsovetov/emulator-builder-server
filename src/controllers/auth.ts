@@ -51,13 +51,9 @@ export const login: RequestHandler = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/auth/logout
 // @access  Private
 export const logout: RequestHandler = asyncHandler(async (req, res, next) => {
-  res
-    .cookie('token', 'none', {
-      expires: new Date(Date.now() + 1000),
-    })
-    .json({
-      success: true,
-    });
+  res.json({
+    success: true,
+  });
 });
 
 function responseWithJWT(
@@ -66,15 +62,8 @@ function responseWithJWT(
   user: DocumentType<User>,
 ) {
   const token = user.getJWT();
-  res
-    .status(status)
-    .cookie('token', token, {
-      expires: new Date(
-        Date.now() + +process.env.JWT_COOKIE_EXPIRE! * 24 * 60 * 60 * 1000,
-      ),
-    })
-    .json({
-      success: true,
-      data: token,
-    });
+  res.status(status).json({
+    success: true,
+    data: token,
+  });
 }
