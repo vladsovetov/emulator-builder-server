@@ -17,8 +17,8 @@ router.get('/', getMany);
 router.get('/:id', getOne);
 
 // Private APIs
-// Creator role
-router.use(authorized, role(USER_ROLES.CREATOR));
+// Admin role
+router.use(authorized, role(USER_ROLES.ADMIN));
 router.post('/', createOne);
 router.put('/:id', updateOne);
 router.delete('/:id', deleteOne);

@@ -49,8 +49,11 @@ export default class App {
     // put all env config into process.env
     dotenv.config({ path: './config/config.env' });
 
-    // connect to Mongoose
-    connectDB();
+    // connect to Mongoose only if not in test env
+    // because for that we use a separate test DB
+    if (process.env.NODE_ENV !== 'test') {
+      connectDB();
+    }
   }
 
   private initMiddleware() {

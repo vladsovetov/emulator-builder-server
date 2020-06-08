@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Server side API interface for the common emulator builder",
   "scripts": {
-    "test": "mocha -r ts-node/register test/**/** --file ./test/setup.ts",
+    "test": "NODE_ENV=test mocha -r ts-node/register test/**/** --file ./test/setup.ts",
     "test:watch": "nodemon --exec 'npm run test -- --watch --watch-files src, test/**/*.ts'",
     "start": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' src/index.ts"
   },
