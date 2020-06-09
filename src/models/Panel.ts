@@ -1,6 +1,9 @@
-import { prop, getModelForClass } from '@typegoose/typegoose';
+import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
 
-export class Panel {
+import { BaseEntity } from './BaseEntity';
+import { User } from './User';
+
+export class Panel extends BaseEntity {
   @prop({
     required: true,
   })

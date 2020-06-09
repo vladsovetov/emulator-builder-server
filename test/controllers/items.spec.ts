@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { expect } from 'chai';
 import 'mocha';
+import { decode } from 'jsonwebtoken';
 
 import { USER_ROLES } from '../../src/constants';
 import { server } from '../../src/server';
@@ -35,12 +36,14 @@ describe('Item CRUD operations', () => {
     });
 
     it('should update an item', async () => {
-      const { newType, res } = await getUpdateItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { newType, res } = await getUpdateItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data.type).to.equal(newType);
     });
 
     it('should delete an item', async () => {
-      const { res } = await getDeleteItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data).to.equal(null);
     });
   });
@@ -72,13 +75,29 @@ describe('Item CRUD operations', () => {
     });
 
     it('should update an item', async () => {
-      const { newType, res } = await getUpdateItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { newType, res } = await getUpdateItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data.type).to.equal(newType);
     });
 
+    it('should not update not own item', async () => {
+      // create an item as an admin
+      const decoded = decode(global.users.getJwtByRole(USER_ROLES.ADMIN));
+      const { newType, res } = await getUpdateItemByIdResult(jwt, decoded?.sub);
+      expect(res.body.error).to.be.not.empty;
+    });
+
     it('should delete an item', async () => {
-      const { res } = await getDeleteItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data).to.equal(null);
+    });
+
+    it('should not delete not own item', async () => {
+      // create an item as an admin
+      const decoded = decode(global.users.getJwtByRole(USER_ROLES.ADMIN));
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
+      expect(res.body.error).to.be.not.empty;
     });
   });
 
@@ -104,13 +123,15 @@ describe('Item CRUD operations', () => {
     });
 
     it('should not update an item', async () => {
-      const { newType, res } = await getUpdateItemByIdResult(jwt);
-      expect(res.body.data).to.be.undefined;
+      const decoded = decode(jwt);
+      const { newType, res } = await getUpdateItemByIdResult(jwt, decoded?.sub);
+      expect(res.body.error).to.be.not.empty;
     });
 
     it('should not delete an item', async () => {
-      const { res } = await getDeleteItemByIdResult(jwt);
-      expect(res.body.data).to.be.undefined;
+      const decoded = decode(jwt);
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
+      expect(res.body.error).to.be.not.empty;
     });
   });
 });
@@ -172,8 +193,8 @@ const getItemByIdResult = async (jwt: string) => {
   return { item, res };
 };
 
-const getUpdateItemByIdResult = async (jwt: string) => {
-  const item = new ItemModel({ name: 'test', type: 'test' });
+const getUpdateItemByIdResult = async (jwt: string, ownerUser: string = '') => {
+  const item = new ItemModel({ name: 'test', type: 'test', user: ownerUser });
   await item.save();
   const newType = 'test updated';
   const res = await request(server)
@@ -185,8 +206,8 @@ const getUpdateItemByIdResult = async (jwt: string) => {
   return { newType, res };
 };
 
-const getDeleteItemByIdResult = async (jwt: string) => {
-  const item = new ItemModel({ name: 'test', type: 'test' });
+const getDeleteItemByIdResult = async (jwt: string, ownerUser: string = '') => {
+  const item = new ItemModel({ name: 'test', type: 'test', user: ownerUser });
   await item.save();
   const res = await request(server)
     .delete(`/api/v1/items/${item._id}`)

@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { expect } from 'chai';
 import 'mocha';
+import { decode } from 'jsonwebtoken';
 
 import { USER_ROLES } from '../../src/constants';
 import { server } from '../../src/server';
@@ -35,12 +36,14 @@ describe('Collection CRUD operations', () => {
     });
 
     it('should update a collection', async () => {
-      const { newName, res } = await getUpdateItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { newName, res } = await getUpdateItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data.name).to.equal(newName);
     });
 
     it('should delete a collection', async () => {
-      const { res } = await getDeleteItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data).to.equal(null);
     });
   });
@@ -72,13 +75,30 @@ describe('Collection CRUD operations', () => {
     });
 
     it('should update a collection', async () => {
-      const { newName, res } = await getUpdateItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { newName, res } = await getUpdateItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data.name).to.equal(newName);
     });
 
+    it('should not update not own collection', async () => {
+      // create a collection as an admin
+      const decoded = decode(global.users.getJwtByRole(USER_ROLES.ADMIN));
+      const { newName, res } = await getUpdateItemByIdResult(jwt, decoded?.sub);
+      expect(res.body.error).to.be.not.empty;
+    });
+
     it('should delete a collection', async () => {
-      const { res } = await getDeleteItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data).to.equal(null);
+    });
+
+    it('should not delete not own collection', async () => {
+      // create a collection as an admin
+      const decoded = decode(global.users.getJwtByRole(USER_ROLES.ADMIN));
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
+      console.log(res.body);
+      expect(res.body.error).to.be.not.empty;
     });
   });
 
@@ -104,13 +124,15 @@ describe('Collection CRUD operations', () => {
     });
 
     it('should not update a collection', async () => {
-      const { newName, res } = await getUpdateItemByIdResult(jwt);
-      expect(res.body.data).to.be.undefined;
+      const decoded = decode(jwt);
+      const { newName, res } = await getUpdateItemByIdResult(jwt, decoded?.sub);
+      expect(res.body.error).to.be.not.empty;
     });
 
     it('should not delete a collection', async () => {
-      const { res } = await getDeleteItemByIdResult(jwt);
-      expect(res.body.data).to.be.undefined;
+      const decoded = decode(jwt);
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
+      expect(res.body.error).to.be.not.empty;
     });
   });
 });
@@ -176,10 +198,11 @@ const getItemByIdResult = async (jwt: string) => {
   return { collection, res };
 };
 
-const getUpdateItemByIdResult = async (jwt: string) => {
+const getUpdateItemByIdResult = async (jwt: string, ownerUser: string = '') => {
   const collection = new CollectionModel({
     name: 'collection1',
     items: [],
+    user: ownerUser,
   });
   await collection.save();
   const newName = 'collection2';
@@ -192,8 +215,22 @@ const getUpdateItemByIdResult = async (jwt: string) => {
   return { newName, res };
 };
 
-const getDeleteItemByIdResult = async (jwt: string) => {
-  const collection = new CollectionModel({ name: 'collection1' });
+const getDeleteItemByIdResult = async (jwt: string, ownerUser: string = '') => {
+  const collection = new CollectionModel({
+    name: 'collection1',
+    user: ownerUser,
+  });
+  await collection.save();
+  const res = await request(server)
+    .delete(`/api/v1/collections/${collection._id}`)
+    .set('Authorization', `Bearer ${jwt}`);
+  return { res };
+};
+
+const getDeleteNotOwnItemByIdResult = async (jwt: string) => {
+  const collection = new CollectionModel({
+    name: 'collection1',
+  });
   await collection.save();
   const res = await request(server)
     .delete(`/api/v1/collections/${collection._id}`)

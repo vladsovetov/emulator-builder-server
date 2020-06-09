@@ -1,10 +1,11 @@
 import { prop, getModelForClass, Ref, plugin } from '@typegoose/typegoose';
 import idValidator from 'mongoose-id-validator';
+import { BaseEntity } from './BaseEntity';
 import { Item } from './Item';
 import { Prop } from './Prop';
 
 @plugin(idValidator)
-export class Collection {
+export class Collection extends BaseEntity {
   @prop({
     required: true,
   })

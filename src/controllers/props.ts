@@ -3,6 +3,7 @@ import createError from 'http-errors';
 
 import { Prop, PropModel } from '../models/Prop';
 import asyncHandler from '../middleware/asyncHandler';
+import { canMutateEntity } from '../utils/permissionsValidator';
 
 // @desc    Create prop
 // @route   POST /api/v1/props
@@ -14,6 +15,7 @@ export const createOne: RequestHandler = asyncHandler(
     const prop = await PropModel.create({
       name: name,
       value: value,
+      user: req.user?.sub,
     } as Prop);
 
     res.status(201).json({
@@ -70,6 +72,9 @@ export const updateOne: RequestHandler = asyncHandler(
     if (!name && typeof value === 'undefined') {
       return next(createError(400, `Provided bad fields for the resource`));
     }
+    if (!canMutateEntity(prop, req.user)) {
+      return next(createError(403, `Forbidden to access`));
+    }
     if (name) {
       prop.name = name;
     }
@@ -96,6 +101,10 @@ export const deleteOne: RequestHandler = asyncHandler(
 
     if (!prop) {
       return next(createError(404, `Can not find resource`));
+    }
+
+    if (!canMutateEntity(prop, req.user)) {
+      return next(createError(403, `Forbidden to access`));
     }
 
     await prop.remove();

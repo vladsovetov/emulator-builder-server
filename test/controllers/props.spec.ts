@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { expect } from 'chai';
 import 'mocha';
+import { decode } from 'jsonwebtoken';
 
 import { USER_ROLES } from '../../src/constants';
 import { server } from '../../src/server';
@@ -29,12 +30,17 @@ describe('Props CRUD operations', () => {
     });
 
     it('should update a prop', async () => {
-      const { newValue, res } = await getUpdateItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { newValue, res } = await getUpdateItemByIdResult(
+        jwt,
+        decoded?.sub,
+      );
       expect(res.body.data.value).to.equal(newValue);
     });
 
     it('should delete a prop', async () => {
-      const { res } = await getDeleteItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data).to.equal(null);
     });
   });
@@ -61,13 +67,35 @@ describe('Props CRUD operations', () => {
     });
 
     it('should update a prop', async () => {
-      const { newValue, res } = await getUpdateItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { newValue, res } = await getUpdateItemByIdResult(
+        jwt,
+        decoded?.sub,
+      );
       expect(res.body.data.value).to.equal(newValue);
     });
 
+    it('should not update not own prop', async () => {
+      // create a prop as an admin
+      const decoded = decode(global.users.getJwtByRole(USER_ROLES.ADMIN));
+      const { newValue, res } = await getUpdateItemByIdResult(
+        jwt,
+        decoded?.sub,
+      );
+      expect(res.body.error).to.be.not.empty;
+    });
+
     it('should delete a prop', async () => {
-      const { res } = await getDeleteItemByIdResult(jwt);
+      const decoded = decode(jwt);
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
       expect(res.body.data).to.equal(null);
+    });
+
+    it('should not delete not own prop', async () => {
+      // create a prop as an admin
+      const decoded = decode(global.users.getJwtByRole(USER_ROLES.ADMIN));
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
+      expect(res.body.error).to.be.not.empty;
     });
   });
 
@@ -93,13 +121,18 @@ describe('Props CRUD operations', () => {
     });
 
     it('should not update a prop', async () => {
-      const { newValue, res } = await getUpdateItemByIdResult(jwt);
-      expect(res.body.data).to.be.undefined;
+      const decoded = decode(jwt);
+      const { newValue, res } = await getUpdateItemByIdResult(
+        jwt,
+        decoded?.sub,
+      );
+      expect(res.body.error).to.be.not.empty;
     });
 
     it('should not delete a prop', async () => {
-      const { res } = await getDeleteItemByIdResult(jwt);
-      expect(res.body.data).to.be.undefined;
+      const decoded = decode(jwt);
+      const { res } = await getDeleteItemByIdResult(jwt, decoded?.sub);
+      expect(res.body.error).to.be.not.empty;
     });
   });
 });
@@ -141,8 +174,8 @@ const getItemByIdResult = async (jwt: string) => {
   return { prop, res };
 };
 
-const getUpdateItemByIdResult = async (jwt: string) => {
-  const prop = new PropModel({ name: 'test', value: 0 });
+const getUpdateItemByIdResult = async (jwt: string, ownerUser: string = '') => {
+  const prop = new PropModel({ name: 'test', value: 0, user: ownerUser });
   await prop.save();
   const newValue = '1';
   const res = await request(server)
@@ -154,8 +187,8 @@ const getUpdateItemByIdResult = async (jwt: string) => {
   return { newValue, res };
 };
 
-const getDeleteItemByIdResult = async (jwt: string) => {
-  const prop = new PropModel({ name: 'test', value: 0 });
+const getDeleteItemByIdResult = async (jwt: string, ownerUser: string = '') => {
+  const prop = new PropModel({ name: 'test', value: 0, user: ownerUser });
   await prop.save();
   const res = await request(server)
     .delete(`/api/v1/props/${prop._id}`)

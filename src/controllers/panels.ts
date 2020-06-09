@@ -3,6 +3,7 @@ import createError from 'http-errors';
 
 import { Panel, PanelModel } from '../models/Panel';
 import asyncHandler from '../middleware/asyncHandler';
+import { canMutateEntity } from '../utils/permissionsValidator';
 
 // @desc    Create panel
 // @route   POST /api/v1/panels
@@ -18,6 +19,7 @@ export const createOne: RequestHandler = asyncHandler(
       name: name,
       type: type,
       settings: settings,
+      user: req.user?.sub,
     } as Panel);
 
     res.status(201).json({
@@ -74,6 +76,10 @@ export const updateOne: RequestHandler = asyncHandler(
       return next(createError(404, `Can not find resource`));
     }
 
+    if (!canMutateEntity(panel, req.user)) {
+      return next(createError(403, `Forbidden to access`));
+    }
+
     if (name) {
       panel.name = name;
     }
@@ -103,6 +109,10 @@ export const deleteOne: RequestHandler = asyncHandler(
 
     if (!panel) {
       return next(createError(404, `Can not find resource`));
+    }
+
+    if (!canMutateEntity(panel, req.user)) {
+      return next(createError(403, `Forbidden to access`));
     }
 
     await panel.remove();

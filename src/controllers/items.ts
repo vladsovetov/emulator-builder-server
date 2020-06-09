@@ -5,10 +5,11 @@ import { Item, ItemModel } from '../models/Item';
 import { Prop } from '../models/Prop';
 import { validatePropsRefs } from '../utils/propsValidator';
 import asyncHandler from '../middleware/asyncHandler';
+import { canMutateEntity } from '../utils/permissionsValidator';
 
 // @desc    Create item
 // @route   POST /api/v1/items
-// @access  Private, Creator
+// @access  Private, Creator, Admin
 export const createOne: RequestHandler = asyncHandler(
   async (req, res, next) => {
     const { name, type } = req.body;
@@ -25,6 +26,7 @@ export const createOne: RequestHandler = asyncHandler(
       name: name,
       type: type,
       props: props,
+      user: req.user?.sub,
     } as Item);
 
     res.status(201).json({
@@ -77,6 +79,10 @@ export const updateOne: RequestHandler = asyncHandler(
       return next(createError(404, `Can not find resource`));
     }
 
+    if (!canMutateEntity(item, req.user)) {
+      return next(createError(403, `Forbidden to access`));
+    }
+
     item.type = type;
     await item.save();
 
@@ -98,6 +104,10 @@ export const deleteOne: RequestHandler = asyncHandler(
 
     if (!item) {
       return next(createError(404, `Can not find resource`));
+    }
+
+    if (!canMutateEntity(item, req.user)) {
+      return next(createError(403, `Forbidden to access`));
     }
 
     await item.remove();

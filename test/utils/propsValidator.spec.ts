@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { expect } from 'chai';
 import 'mocha';
 
@@ -10,6 +11,7 @@ const createProps = (length: number) => {
     props.push({
       name: `name${ind}`,
       value: `${ind}`,
+      user: Types.ObjectId(),
     });
   }
   return props;

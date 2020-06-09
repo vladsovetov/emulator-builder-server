@@ -1,6 +1,7 @@
-import { prop, getModelForClass } from '@typegoose/typegoose';
+import { prop, getModelForClass, Ref } from '@typegoose/typegoose';
+import { BaseEntity } from './BaseEntity';
 
-export class Prop {
+export class Prop extends BaseEntity {
   @prop()
   public name: string = '';
 

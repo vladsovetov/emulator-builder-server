@@ -1,9 +1,10 @@
 import { prop, getModelForClass, Ref, plugin } from '@typegoose/typegoose';
 import idValidator from 'mongoose-id-validator';
+import { BaseEntity } from './BaseEntity';
 import { Prop } from './Prop';
 
 @plugin(idValidator)
-export class Item {
+export class Item extends BaseEntity {
   @prop({
     required: true,
   })

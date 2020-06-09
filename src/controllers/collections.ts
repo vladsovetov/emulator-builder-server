@@ -4,6 +4,7 @@ import createError from 'http-errors';
 import { Collection, CollectionModel } from '../models/Collection';
 import { Item } from '../models/Item';
 import asyncHandler from '../middleware/asyncHandler';
+import { canMutateEntity } from '../utils/permissionsValidator';
 
 // @desc    Create collection
 // @route   POST /api/v1/collections
@@ -16,6 +17,7 @@ export const createOne: RequestHandler = asyncHandler(
     const collection = await CollectionModel.create({
       name: name,
       items: items,
+      user: req.user?.sub,
     } as Collection);
 
     res.status(201).json({
@@ -68,6 +70,10 @@ export const updateOne: RequestHandler = asyncHandler(
       return next(createError(404, `Can not find resource`));
     }
 
+    if (!canMutateEntity(collection, req.user)) {
+      return next(createError(403, `Forbidden to access`));
+    }
+
     collection.name = name;
     await collection.save();
 
@@ -89,6 +95,10 @@ export const deleteOne: RequestHandler = asyncHandler(
 
     if (!collection) {
       return next(createError(404, `Can not find resource`));
+    }
+
+    if (!canMutateEntity(collection, req.user)) {
+      return next(createError(403, `Forbidden to access`));
     }
 
     await collection.remove();
